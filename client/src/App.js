@@ -13,18 +13,21 @@ import { useState, useEffect } from "react";
 import socketIOClient from "socket.io-client";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
+let connectionIP, connectionPORT;
 
 function App() {
   const [showConnectionModal, setshowConnectionModal] = useState(false);
-
   const [messages, setMessages] = useState([]);
 
   const handleClose = (e) => {
     if (e) {
       e.preventDefault();
       setshowConnectionModal(false);
-      let url = e.target.form[0].value;
-      fetch(url).then((d) => console.log("DATOS: ", d));
+      connectionIP = e.target.form[0].value;
+      connectionPORT = e.target.form[1].value;
+      let url = "http://" + connectionIP + ":" + connectionPORT;
+      console.log("sending url", url);
+      socket.emit("ConnectionURL", url);
     } else {
       setshowConnectionModal(false);
     }
@@ -32,10 +35,8 @@ function App() {
   //const handleShow = () => setshowConnectionModal(true);
   useEffect(() => {
     socket.on("ToClient", (payload) => {
-      console.log(payload);
-      var temp = messages;
-      temp.push({ id: 1, data: payload.data });
-      setMessages([...temp]);
+      setMessages((oldArray) => [...oldArray, { id: 1, data: payload.data }]);
+      console.log(messages);
     });
     // eslint-disable-next-line
   }, []);
@@ -47,9 +48,8 @@ function App() {
   const handleSubmitMessage = (e) => {
     e.preventDefault();
     let data = e.target.form[0].value;
-    var temp = messages;
-    temp.push({ id: 0, data });
-    setMessages([...temp]);
+    setMessages((oldArray) => [...oldArray, { id: 0, data }]);
+    console.log(messages);
     socket.emit("FromClient", { function: 1, data });
   };
 
@@ -59,10 +59,12 @@ function App() {
         <Modal.Header closeButton>
           <Modal.Title>Specify Connection</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Write a connection port</Modal.Body>
+        <Modal.Body>Write connection details</Modal.Body>
         <Form style={{ padding: "2rem" }}>
           <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Connection port:</Form.Label>
+            <Form.Label>Connection IP:</Form.Label>
+            <Form.Control type="text" />
+            <Form.Label>Connection PORT:</Form.Label>
             <Form.Control type="text" />
           </Form.Group>
 
@@ -83,6 +85,12 @@ function App() {
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>Host:</b> {window.location.host}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <b>Connected:</b> {connectionIP}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <b>PORT:</b> {connectionPORT}
               </ListGroup.Item>
             </ListGroup>
           </Col>

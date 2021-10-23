@@ -13,8 +13,8 @@ const io = require("socket.io")(http, {
 // Argumentos de linea de comandos
 var myArgs = process.argv.slice(2);
 // Puerto es el primer argumento que se pasa
-// const port = process.env.PORT || myArgs[0];
-const port = myArgs[0];
+const port = myArgs[0] || process.env.PORT;
+// const port = myArgs[0];
 // Se almacenan los mensajes recibidos
 var mensajes = [];
 // Se usa para ENVIAR mensajes
@@ -59,6 +59,14 @@ io.on("connection", (socket) => {
 io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     socketOut.emit("Mensaje ASCP", payload);
+  });
+});
+
+io.on("connection", (socket) => {
+  socket.on("ConnectionURL", (payload) => {
+    socketOut = ioc(payload);
+    console.log("payload", payload);
+    console.log(socketOut);
   });
 });
 // Escuchar en el puerto especificado en la línea de comandos
