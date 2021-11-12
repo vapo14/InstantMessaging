@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
-    let encodedMessage = encodeDesECB(payload.data);
+    let encodedMessage = encodeDesECB(payload.data, globalKey);
     payload.data = encodedMessage;
     socketOut.emit("Mensaje ASCP", payload);
   });
