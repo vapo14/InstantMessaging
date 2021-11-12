@@ -9,17 +9,21 @@ import {
   Col,
   ListGroup,
 } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import socketIOClient from "socket.io-client";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
 let encryptionKey;
+let messagesEnd;
 
 function App() {
   const [showConnectionModal, setshowConnectionModal] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [messageContent, setMessageContent] = useState("");
   let key = 0;
+  const mounted = useRef();
+
   const handleClose = (e) => {
     if (e) {
       e.preventDefault();
@@ -34,14 +38,30 @@ function App() {
       setshowConnectionModal(false);
     }
   };
+
+  const scrollToBottom = () => {
+    messagesEnd.scrollIntoView({ behavior: "smooth" });
+  };
+
   //const handleShow = () => setshowConnectionModal(true);
   useEffect(() => {
     socket.on("ToClient", (payload) => {
       setMessages((oldArray) => [...oldArray, { id: 1, data: payload.data }]);
       console.log(messages);
     });
+    scrollToBottom();
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    if (!mounted.current) {
+      // do componentDidMount logic
+      mounted.current = true;
+    } else {
+      // do componentDidUpdate logic
+      scrollToBottom();
+    }
+  });
 
   useEffect(() => {
     setshowConnectionModal(true);
@@ -49,10 +69,17 @@ function App() {
 
   const handleSubmitMessage = (e) => {
     e.preventDefault();
-    let data = e.target.form[0].value;
-    setMessages((oldArray) => [...oldArray, { id: 0, data }]);
-    console.log(messages);
-    socket.emit("FromClient", { function: 1, data });
+    if (messageContent !== "") {
+      let data = messageContent;
+      setMessages((oldArray) => [...oldArray, { id: 0, data }]);
+      console.log(messages);
+      socket.emit("FromClient", { function: 1, data });
+      setMessageContent("");
+    }
+  };
+
+  const handleMessageChange = (e) => {
+    setMessageContent(e.target.value);
   };
 
   return (
@@ -121,6 +148,12 @@ function App() {
                     </div>
                   );
                 })}
+                <div
+                  style={{ float: "left", clear: "both" }}
+                  ref={(el) => {
+                    messagesEnd = el;
+                  }}
+                ></div>
               </Container>
             </div>
             <Container style={{ position: "relative", marginTop: "2rem" }}>
@@ -130,6 +163,8 @@ function App() {
                     <Form.Control
                       className="me-auto"
                       placeholder="Write your message here..."
+                      onChange={handleMessageChange}
+                      value={messageContent}
                     />
                     <Button
                       variant="primary"
