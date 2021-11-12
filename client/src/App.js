@@ -18,7 +18,7 @@ let connectionIP, connectionPORT;
 function App() {
   const [showConnectionModal, setshowConnectionModal] = useState(false);
   const [messages, setMessages] = useState([]);
-
+  let key = 0;
   const handleClose = (e) => {
     if (e) {
       e.preventDefault();
@@ -110,7 +110,7 @@ function App() {
               <Container>
                 {messages.map((m) => {
                   return (
-                    <div>
+                    <div key={key++}>
                       <Alert variant={m.id === 1 ? "primary" : "secondary"}>
                         {m.data}
                       </Alert>

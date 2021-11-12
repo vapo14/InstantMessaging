@@ -1,4 +1,5 @@
 require("dotenv").config();
+const crypto = require("crypto");
 const app = require("express")();
 // Servidor HTTP
 const http = require("http").Server(app);
@@ -10,6 +11,31 @@ const io = require("socket.io")(http, {
     methods: ["GET", "POST"],
   },
 });
+
+// funciones de encripcion
+function encodeDesECB(textToEncode, keyString = "10100101") {
+  var key = new Buffer.from(keyString.substring(0, 8), "utf8");
+
+  var cipher = crypto.createCipheriv("des-ecb", key, "");
+
+  var c = cipher.update(textToEncode, "utf8", "base64");
+  c += cipher.final("base64");
+
+  return c;
+}
+
+function decodeDesECB(textToDecode, keyString = "10100101") {
+  var key = new Buffer.from(keyString.substring(0, 8), "utf8");
+
+  var decipher = crypto.createDecipheriv("des-ecb", key, "");
+
+  var d = decipher.update(textToDecode, "base64", "utf8");
+
+  d += decipher.final("utf8");
+
+  return d;
+}
+
 // Argumentos de linea de comandos
 var myArgs = process.argv.slice(2);
 // Puerto es el primer argumento que se pasa
@@ -40,6 +66,8 @@ app.get("/conectar", (req, res) => {
 
 // Enviar mensaje al host al que se encuentra conectado
 app.get("/enviar_mensaje", (req, res) => {
+  let encodedMessage = encodeDesECB(req.query.msg);
+  req.query.msg = encodedMessage;
   res.send("Mensaje " + req.query.msg);
   socketOut.emit("Mensaje ASCP", { function: 1, data: req.query.msg });
 });
@@ -52,12 +80,19 @@ io.on("connection", (socket) => {
   socket.on("Mensaje ASCP", (payload) => {
     console.log(socket.id + " " + payload.data);
     mensajes.push(payload.data);
+    // desencriptar payload.data
+    payload.data = decodeDesECB(payload.data);
+    console.log("desencriptado: ", payload.data);
     io.emit("ToClient", payload);
   });
 });
 
 io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
+    // encriptar payload.data
+    console.log(payload);
+    let encodedMessage = encodeDesECB(payload.data);
+    payload.data = encodedMessage;
     socketOut.emit("Mensaje ASCP", payload);
   });
 });
