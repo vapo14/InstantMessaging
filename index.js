@@ -101,7 +101,7 @@ io.on("connection", (socket) => {
 io.on("connection", (socket) => {
   socket.on("ConnectionURL", (payload) => {
     socketOut = ioc(payload.url);
-    globalKey = payload.encyrptionKey;
+    globalKey = payload.encryptionKey;
     console.log("payload", payload);
     console.log(socketOut);
   });
