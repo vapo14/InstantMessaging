@@ -13,7 +13,7 @@ const io = require("socket.io")(http, {
 });
 
 // funciones de encripcion
-function encodeDesECB(textToEncode, keyString = "10100101") {
+function encodeDesECB(textToEncode, keyString) {
   var key = new Buffer.from(keyString.substring(0, 8), "utf8");
 
   var cipher = crypto.createCipheriv("des-ecb", key, "");
@@ -24,7 +24,7 @@ function encodeDesECB(textToEncode, keyString = "10100101") {
   return c;
 }
 
-function decodeDesECB(textToDecode, keyString = "10100101") {
+function decodeDesECB(textToDecode, keyString) {
   var key = new Buffer.from(keyString.substring(0, 8), "utf8");
 
   var decipher = crypto.createDecipheriv("des-ecb", key, "");
@@ -43,6 +43,7 @@ const port = myArgs[0] || process.env.PORT;
 // const port = myArgs[0];
 // Se almacenan los mensajes recibidos
 var mensajes = [];
+var globalKey = "";
 // Se usa para ENVIAR mensajes
 var socketOut = null;
 app.get("/", (req, res) => {
@@ -81,7 +82,7 @@ io.on("connection", (socket) => {
     console.log(socket.id + " " + payload.data);
     mensajes.push(payload.data);
     // desencriptar payload.data
-    payload.data = decodeDesECB(payload.data);
+    payload.data = decodeDesECB(payload.data, globalKey);
     console.log("desencriptado: ", payload.data);
     io.emit("ToClient", payload);
   });
@@ -99,7 +100,8 @@ io.on("connection", (socket) => {
 
 io.on("connection", (socket) => {
   socket.on("ConnectionURL", (payload) => {
-    socketOut = ioc(payload);
+    socketOut = ioc(payload.url);
+    globalKey = payload.encyrptionKey;
     console.log("payload", payload);
     console.log(socketOut);
   });

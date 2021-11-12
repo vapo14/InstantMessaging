@@ -14,6 +14,7 @@ import socketIOClient from "socket.io-client";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
+let encryptionKey;
 
 function App() {
   const [showConnectionModal, setshowConnectionModal] = useState(false);
@@ -25,9 +26,10 @@ function App() {
       setshowConnectionModal(false);
       connectionIP = e.target.form[0].value;
       connectionPORT = e.target.form[1].value;
+      encryptionKey = e.target.form[2].value;
       let url = "http://" + connectionIP + ":" + connectionPORT;
       console.log("sending url", url);
-      socket.emit("ConnectionURL", url);
+      socket.emit("ConnectionURL", { url, encryptionKey });
     } else {
       setshowConnectionModal(false);
     }
@@ -66,6 +68,8 @@ function App() {
             <Form.Control type="text" />
             <Form.Label>Connection PORT:</Form.Label>
             <Form.Control type="text" />
+            <Form.Label>Encryption Key:</Form.Label>
+            <Form.Control type="text" maxLength="8" />
           </Form.Group>
 
           <Button variant="primary" type="submit" onClick={handleClose}>
