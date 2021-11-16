@@ -11,6 +11,7 @@ import {
 } from "react-bootstrap";
 import { useState, useEffect, useRef } from "react";
 import socketIOClient from "socket.io-client";
+import "./custom.css";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
@@ -142,9 +143,15 @@ function App() {
                 {messages.map((m) => {
                   return (
                     <div key={key++}>
-                      <Alert variant={m.id === 1 ? "primary" : "secondary"}>
+                      <div
+                        class={
+                          m.id === 1
+                            ? "speech-bubble speech-bubble-left"
+                            : "speech-bubble speech-bubble-bottom-right speech-bubble-blue"
+                        }
+                      >
                         {m.data}
-                      </Alert>
+                      </div>
                     </div>
                   );
                 })}
