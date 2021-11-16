@@ -124,6 +124,9 @@ function App() {
               <ListGroup.Item>
                 <b>PORT:</b> {connectionPORT}
               </ListGroup.Item>
+              <ListGroup.Item>
+                <b>Key:</b> {encryptionKey}
+              </ListGroup.Item>
             </ListGroup>
           </Col>
           <Col>
@@ -132,7 +135,7 @@ function App() {
                 height: "80vh",
                 overflowY: "scroll",
                 border: "solid #c4c5c7 1px",
-                borderRadius: "1rem",
+                borderRadius: ".5rem",
                 maxWidth: "60vw",
                 marginLeft: "auto",
                 marginRight: "auto",
