@@ -94,7 +94,7 @@ app.get("/obtener_ultimo_mensaje", (req, res) => {
 // Recibir mensajes
 io.on("connection", (socket) => {
   socket.on("Mensaje ASCP", (payload) => {
-    console.log(socket.id + " " + payload.data);
+    console.log("Encriptado: ", socket.id + " " + payload.data);
     mensajes.push(payload.data);
     // desencriptar payload.data
     payload.data = decodeDesECB(payload.data, dfKey.value.toString());
@@ -104,8 +104,8 @@ io.on("connection", (socket) => {
   if (!isAlice) {
     socket.on("SIMP_INIT_COMM", (payload) => {
       publicKey = computeDiffieHellman(a, randomX, q);
-      dfKey = computeDiffieHellman(payload.data.y, randomX, q);
-      io.emit("SIMP_KEY_COMPUTED", {
+      dfKey = computeDiffieHellman(bigInt(payload.data.y.value), randomX, q);
+      socketOut.emit("SIMP_KEY_COMPUTED", {
         function: 3,
         data: { q, a, y: publicKey },
       });
@@ -114,7 +114,8 @@ io.on("connection", (socket) => {
 
   if (isAlice) {
     socket.on("SIMP_KEY_COMPUTED", (payload) => {
-      dfKey = computeDiffieHellman(payload.data.y, randomX, q);
+      console.log(payload);
+      dfKey = computeDiffieHellman(bigInt(payload.data.y.value), randomX, q);
     });
   }
 });
@@ -133,12 +134,11 @@ io.on("connection", (socket) => {
   socket.on("ConnectionURL", (payload) => {
     socketOut = ioc(payload.url);
     isAlice = payload.isAlice;
-    console.log("Is alice: ", isAlice);
     if (isAlice) {
       let y = computeDiffieHellman(a, randomX, q);
       socketOut.emit("SIMP_INIT_COMM", { function: 2, data: { q, a, y } });
     }
-    console.log(socketOut);
+    console.log("Connected: ", socketOut.id);
   });
 });
 // Escuchar en el puerto especificado en la línea de comandos
