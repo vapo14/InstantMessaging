@@ -82,7 +82,7 @@ app.get("/conectar", (req, res) => {
 
 // Enviar mensaje al host al que se encuentra conectado
 app.get("/enviar_mensaje", (req, res) => {
-  let encodedMessage = encodeDesECB(req.query.msg, dfKey.value);
+  let encodedMessage = encodeDesECB(req.query.msg, dfKey.value.toString());
   req.query.msg = encodedMessage;
   res.send("Mensaje " + req.query.msg);
   socketOut.emit("Mensaje ASCP", { function: 1, data: req.query.msg });
@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
     console.log(socket.id + " " + payload.data);
     mensajes.push(payload.data);
     // desencriptar payload.data
-    payload.data = decodeDesECB(payload.data, dfKey.value);
+    payload.data = decodeDesECB(payload.data, dfKey.value.toString());
     console.log("desencriptado: ", payload.data);
     io.emit("ToClient", payload);
   });
@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
-    let encodedMessage = encodeDesECB(payload.data, dfKey.value);
+    let encodedMessage = encodeDesECB(payload.data, dfKey.value.toString());
     payload.data = encodedMessage;
     socketOut.emit("Mensaje ASCP", payload);
   });
