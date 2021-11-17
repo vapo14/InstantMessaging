@@ -1,13 +1,14 @@
-const crypto = require("crypto");
+bigInt = require("./bigInt");
 
-function encodeDesECB(textToEncode, keyString = "10100101") {
-  var key = new Buffer.from(keyString.substring(0, 8), "utf8");
-  var cipher = crypto.createCipheriv("des-ecb", key, "");
+const qr = bigInt(2426697107);
+const a = bigInt(17123207);
+const privateXKey = bigInt(Math.floor(Math.random() * qr));
 
-  var c = cipher.update(textToEncode, "utf8", "base64");
-  c += cipher.final("base64");
+console.log(privateXKey);
 
-  return c;
+function compute(a, exp, qr) {
+  var res = a.modPow(exp, qr);
+  return res.value;
 }
 
-console.log(encodeDesECB("olis"));
+console.log(compute(a, privateXKey, qr));

@@ -22,8 +22,14 @@ function App() {
   const [showConnectionModal, setshowConnectionModal] = useState(false);
   const [messages, setMessages] = useState([]);
   const [messageContent, setMessageContent] = useState("");
+  const [isAlice, setIsAlice] = useState(false);
   let key = 0;
   const mounted = useRef();
+
+  const handleConnectionChange = () => {
+    setIsAlice(!isAlice);
+    console.log(isAlice);
+  };
 
   const handleClose = (e) => {
     if (e) {
@@ -34,7 +40,7 @@ function App() {
       encryptionKey = e.target.form[2].value;
       let url = "http://" + connectionIP + ":" + connectionPORT;
       console.log("sending url", url);
-      socket.emit("ConnectionURL", { url, encryptionKey });
+      socket.emit("ConnectionURL", { url, isAlice });
     } else {
       setshowConnectionModal(false);
     }
@@ -96,8 +102,14 @@ function App() {
             <Form.Control type="text" />
             <Form.Label>Connection PORT:</Form.Label>
             <Form.Control type="text" />
-            <Form.Label>Encryption Key:</Form.Label>
-            <Form.Control type="text" maxLength="8" />
+            <Form.Check
+              type="switch"
+              id="custom-switch"
+              label="Starts Connection"
+              value={isAlice}
+              onChange={handleConnectionChange}
+              style={{ margin: "1rem" }}
+            />
           </Form.Group>
 
           <Button variant="primary" type="submit" onClick={handleClose}>

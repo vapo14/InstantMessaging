@@ -1,4 +1,5 @@
 require("dotenv").config();
+const bigInt = require("./bigInt");
 const crypto = require("crypto");
 const app = require("express")();
 // Servidor HTTP
@@ -11,6 +12,21 @@ const io = require("socket.io")(http, {
     methods: ["GET", "POST"],
   },
 });
+
+let isAlice = false;
+
+// diffie hellman variables
+let q = bigInt(2426697107);
+let a = bigInt(17123207);
+let randomX = bigInt(Math.floor(Math.random() * q)).value;
+let dfKey;
+let publicKey;
+
+//diffie hellman compute
+function computeDiffieHellman(a, exp, qr) {
+  var res = a.modPow(exp, qr);
+  return res.value;
+}
 
 // funciones de encripcion
 function encodeDesECB(textToEncode, keyString) {
@@ -43,7 +59,6 @@ const port = myArgs[0] || process.env.PORT;
 // const port = myArgs[0];
 // Se almacenan los mensajes recibidos
 var mensajes = [];
-var globalKey = "";
 // Se usa para ENVIAR mensajes
 var socketOut = null;
 app.get("/", (req, res) => {
@@ -67,7 +82,7 @@ app.get("/conectar", (req, res) => {
 
 // Enviar mensaje al host al que se encuentra conectado
 app.get("/enviar_mensaje", (req, res) => {
-  let encodedMessage = encodeDesECB(req.query.msg);
+  let encodedMessage = encodeDesECB(req.query.msg, dfKey);
   req.query.msg = encodedMessage;
   res.send("Mensaje " + req.query.msg);
   socketOut.emit("Mensaje ASCP", { function: 1, data: req.query.msg });
@@ -82,17 +97,33 @@ io.on("connection", (socket) => {
     console.log(socket.id + " " + payload.data);
     mensajes.push(payload.data);
     // desencriptar payload.data
-    payload.data = decodeDesECB(payload.data, globalKey);
+    payload.data = decodeDesECB(payload.data, dfKey);
     console.log("desencriptado: ", payload.data);
     io.emit("ToClient", payload);
   });
+  if (!isAlice) {
+    socket.on("SIMP_INIT_COMM", (payload) => {
+      publicKey = computeDiffieHellman(a, randomX, q);
+      dfKey = computeDiffieHellman(payload.data.y, randomX, q);
+      io.emit("SIMP_KEY_COMPUTED", {
+        function: 3,
+        data: { q, a, y: publicKey },
+      });
+    });
+  }
+
+  if (isAlice) {
+    socket.on("SIMP_KEY_COMPUTED", (payload) => {
+      dfKey = computeDiffieHellman(payload.data.y, randomX, q);
+    });
+  }
 });
 
 io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
-    let encodedMessage = encodeDesECB(payload.data, globalKey);
+    let encodedMessage = encodeDesECB(payload.data, dfKey);
     payload.data = encodedMessage;
     socketOut.emit("Mensaje ASCP", payload);
   });
@@ -101,8 +132,12 @@ io.on("connection", (socket) => {
 io.on("connection", (socket) => {
   socket.on("ConnectionURL", (payload) => {
     socketOut = ioc(payload.url);
-    globalKey = payload.encryptionKey;
-    console.log("payload", payload);
+    isAlice = payload.isAlice;
+    console.log("Is alice: ", isAlice);
+    if (isAlice) {
+      let y = computeDiffieHellman(a, randomX, q);
+      socketOut.emit("SIMP_INIT_COMM", { function: 2, data: { q, a, y } });
+    }
     console.log(socketOut);
   });
 });
