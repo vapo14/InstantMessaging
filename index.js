@@ -13,14 +13,14 @@ const io = require("socket.io")(http, {
   },
 });
 
-let isAlice = false;
+var isAlice = false;
 
 // diffie hellman variables
-let q = bigInt(2426697107);
-let a = bigInt(17123207);
-let randomX = bigInt(Math.floor(Math.random() * q)).value;
-let dfKey;
-let publicKey;
+var q = bigInt(2426697107);
+var a = bigInt(17123207);
+var randomX = bigInt(Math.floor(Math.random() * q)).value;
+var dfKey;
+var publicKey;
 
 //diffie hellman compute
 function computeDiffieHellman(a, exp, qr) {
@@ -82,7 +82,7 @@ app.get("/conectar", (req, res) => {
 
 // Enviar mensaje al host al que se encuentra conectado
 app.get("/enviar_mensaje", (req, res) => {
-  let encodedMessage = encodeDesECB(req.query.msg, dfKey);
+  let encodedMessage = encodeDesECB(req.query.msg, dfKey.value);
   req.query.msg = encodedMessage;
   res.send("Mensaje " + req.query.msg);
   socketOut.emit("Mensaje ASCP", { function: 1, data: req.query.msg });
@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
     console.log(socket.id + " " + payload.data);
     mensajes.push(payload.data);
     // desencriptar payload.data
-    payload.data = decodeDesECB(payload.data, dfKey);
+    payload.data = decodeDesECB(payload.data, dfKey.value);
     console.log("desencriptado: ", payload.data);
     io.emit("ToClient", payload);
   });
@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
-    let encodedMessage = encodeDesECB(payload.data, dfKey);
+    let encodedMessage = encodeDesECB(payload.data, dfKey.value);
     payload.data = encodedMessage;
     socketOut.emit("Mensaje ASCP", payload);
   });

@@ -159,7 +159,7 @@ function App() {
                   return (
                     <div key={key++}>
                       <div
-                        class={
+                        className={
                           m.id === 1
                             ? "speech-bubble speech-bubble-left"
                             : "speech-bubble speech-bubble-bottom-right speech-bubble-blue"
