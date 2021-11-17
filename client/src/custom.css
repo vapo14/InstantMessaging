@@ -48,3 +48,24 @@
 .speech-bubble.speech-bubble-blue:after {
   border-color: #2c87ff;
 }
+
+/* width */
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 0.5rem;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #2c87ff;
+  border-radius: 0.5rem;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #176ad6;
+}
