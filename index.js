@@ -101,6 +101,18 @@ io.on("connection", (socket) => {
     console.log("desencriptado: ", payload.data);
     io.emit("ToClient", payload);
   });
+});
+
+io.on("connection", (socket) => {
+  if (isAlice) {
+    socket.on("SIMP_KEY_COMPUTED", (payload) => {
+      console.log(payload);
+      dfKey = computeDiffieHellman(bigInt(payload.data.y.value), randomX, q);
+    });
+  }
+});
+
+io.on("connection", (socket) => {
   if (!isAlice) {
     socket.on("SIMP_INIT_COMM", (payload) => {
       publicKey = computeDiffieHellman(a, randomX, q);
@@ -109,13 +121,6 @@ io.on("connection", (socket) => {
         function: 3,
         data: { q, a, y: publicKey },
       });
-    });
-  }
-
-  if (isAlice) {
-    socket.on("SIMP_KEY_COMPUTED", (payload) => {
-      console.log(payload);
-      dfKey = computeDiffieHellman(bigInt(payload.data.y.value), randomX, q);
     });
   }
 });
