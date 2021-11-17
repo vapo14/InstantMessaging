@@ -25,7 +25,7 @@ var publicKey;
 //diffie hellman compute
 function computeDiffieHellman(a, exp, qr) {
   var res = a.modPow(exp, qr);
-  return res.value;
+  return res;
 }
 
 // funciones de encripcion
