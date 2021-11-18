@@ -104,25 +104,36 @@ io.on("connection", (socket) => {
 });
 
 io.on("connection", (socket) => {
-  if (isAlice) {
-    socket.on("SIMP_KEY_COMPUTED", (payload) => {
+  socket.on("SIMP_KEY_COMPUTED", (payload) => {
+    if (isAlice) {
       console.log(payload);
       dfKey = computeDiffieHellman(bigInt(payload.data.y.value), randomX, q);
-    });
-  }
+    }
+  });
 });
 
 io.on("connection", (socket) => {
-  if (!isAlice) {
-    socket.on("SIMP_INIT_COMM", (payload) => {
+  socket.on("SIMP_INIT_COMM", (payload) => {
+    if (!isAlice) {
+      console.log("bob is creating keys");
       publicKey = computeDiffieHellman(a, randomX, q);
       dfKey = computeDiffieHellman(bigInt(payload.data.y.value), randomX, q);
       socketOut.emit("SIMP_KEY_COMPUTED", {
         function: 3,
         data: { q, a, y: publicKey },
       });
-    });
-  }
+    }
+  });
+});
+
+io.on("connection", (socket) => {
+  socket.on("create-key", (payload) => {
+    if (isAlice) {
+      console.log("alice creating keys...");
+      let y = computeDiffieHellman(a, randomX, q);
+      socketOut.emit("SIMP_INIT_COMM", { function: 2, data: { q, a, y } });
+    }
+  });
 });
 
 io.on("connection", (socket) => {
@@ -139,10 +150,6 @@ io.on("connection", (socket) => {
   socket.on("ConnectionURL", (payload) => {
     socketOut = ioc(payload.url);
     isAlice = payload.isAlice;
-    if (isAlice) {
-      let y = computeDiffieHellman(a, randomX, q);
-      socketOut.emit("SIMP_INIT_COMM", { function: 2, data: { q, a, y } });
-    }
     console.log("Connected: ", socketOut.id);
   });
 });

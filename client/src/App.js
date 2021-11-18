@@ -14,7 +14,6 @@ import "./custom.css";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
-let encryptionKey;
 let messagesEnd;
 
 function App() {
@@ -22,6 +21,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [messageContent, setMessageContent] = useState("");
   const [isAlice, setIsAlice] = useState(false);
+  const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   let key = 0;
   const mounted = useRef();
 
@@ -36,13 +36,19 @@ function App() {
       setshowConnectionModal(false);
       connectionIP = e.target.form[0].value;
       connectionPORT = e.target.form[1].value;
-      encryptionKey = e.target.form[2].value;
       let url = "http://" + connectionIP + ":" + connectionPORT;
       console.log("sending url", url);
       socket.emit("ConnectionURL", { url, isAlice });
     } else {
       setshowConnectionModal(false);
     }
+  };
+
+  const handleKeyExchange = (e) => {
+    e.preventDefault();
+    setKeysButtonStatus(true);
+    // execute diffie hellman in backend
+    socket.emit("create-key");
   };
 
   const scrollToBottom = () => {
@@ -135,10 +141,19 @@ function App() {
               <ListGroup.Item>
                 <b>PORT:</b> {connectionPORT}
               </ListGroup.Item>
-              <ListGroup.Item>
-                <b>Key:</b> {encryptionKey}
-              </ListGroup.Item>
             </ListGroup>
+            {isAlice ? (
+              <Button
+                className="primary"
+                style={{ margin: "1rem" }}
+                disabled={keysButtonStatus}
+                onClick={handleKeyExchange}
+              >
+                Exchange Keys
+              </Button>
+            ) : (
+              <div></div>
+            )}
           </Col>
           <Col>
             <div
