@@ -14,7 +14,6 @@ import "./custom.css";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
-let encryptionKey;
 let messagesEnd;
 
 function App() {
@@ -37,7 +36,6 @@ function App() {
       setshowConnectionModal(false);
       connectionIP = e.target.form[0].value;
       connectionPORT = e.target.form[1].value;
-      encryptionKey = e.target.form[2].value;
       let url = "http://" + connectionIP + ":" + connectionPORT;
       console.log("sending url", url);
       socket.emit("ConnectionURL", { url, isAlice });
@@ -142,9 +140,6 @@ function App() {
               </ListGroup.Item>
               <ListGroup.Item>
                 <b>PORT:</b> {connectionPORT}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <b>Key:</b> {encryptionKey}
               </ListGroup.Item>
             </ListGroup>
             {isAlice ? (
