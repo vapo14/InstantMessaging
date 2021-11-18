@@ -22,6 +22,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [messageContent, setMessageContent] = useState("");
   const [isAlice, setIsAlice] = useState(false);
+  const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   let key = 0;
   const mounted = useRef();
 
@@ -43,6 +44,13 @@ function App() {
     } else {
       setshowConnectionModal(false);
     }
+  };
+
+  const handleKeyExchange = (e) => {
+    e.preventDefault();
+    setKeysButtonStatus(true);
+    // execute diffie hellman in backend
+    socket.emit("create-key");
   };
 
   const scrollToBottom = () => {
@@ -139,6 +147,18 @@ function App() {
                 <b>Key:</b> {encryptionKey}
               </ListGroup.Item>
             </ListGroup>
+            {isAlice ? (
+              <Button
+                className="primary"
+                style={{ margin: "1rem" }}
+                disabled={keysButtonStatus}
+                onClick={handleKeyExchange}
+              >
+                Exchange Keys
+              </Button>
+            ) : (
+              <div></div>
+            )}
           </Col>
           <Col>
             <div

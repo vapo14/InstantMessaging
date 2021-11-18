@@ -126,6 +126,15 @@ io.on("connection", (socket) => {
 });
 
 io.on("connection", (socket) => {
+  socket.on("create-key", (payload) => {
+    if (isAlice) {
+      let y = computeDiffieHellman(a, randomX, q);
+      socketOut.emit("SIMP_INIT_COMM", { function: 2, data: { q, a, y } });
+    }
+  });
+});
+
+io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
@@ -139,10 +148,6 @@ io.on("connection", (socket) => {
   socket.on("ConnectionURL", (payload) => {
     socketOut = ioc(payload.url);
     isAlice = payload.isAlice;
-    if (isAlice) {
-      let y = computeDiffieHellman(a, randomX, q);
-      socketOut.emit("SIMP_INIT_COMM", { function: 2, data: { q, a, y } });
-    }
     console.log("Connected: ", socketOut.id);
   });
 });
