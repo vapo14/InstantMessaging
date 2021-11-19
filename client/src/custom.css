@@ -69,3 +69,9 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #176ad6;
 }
+
+.dark-theme {
+  background-color: #333;
+  color: white;
+  border-color: whitesmoke;
+}

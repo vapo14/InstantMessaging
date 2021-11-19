@@ -22,6 +22,7 @@ function App() {
   const [messageContent, setMessageContent] = useState("");
   const [isAlice, setIsAlice] = useState(false);
   const [keysButtonStatus, setKeysButtonStatus] = useState(false);
+  const [isDark, setisDark] = useState(false);
   let key = 0;
   const mounted = useRef();
 
@@ -42,6 +43,15 @@ function App() {
     } else {
       setshowConnectionModal(false);
     }
+  };
+
+  const handleThemeChange = () => {
+    if (isDark) {
+      document.body.style.backgroundColor = "white";
+    } else {
+      document.body.style.backgroundColor = "#333";
+    }
+    setisDark(!isDark);
   };
 
   const handleKeyExchange = (e) => {
@@ -95,13 +105,24 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div
+      style={{ padding: "2rem" }}
+      className={isDark ? "dark-theme" : "light-theme"}
+    >
       <Modal show={showConnectionModal} onHide={handleClose}>
-        <Modal.Header closeButton>
+        <Modal.Header
+          closeButton
+          className={isDark ? "dark-theme" : "light-theme"}
+        >
           <Modal.Title>Specify Connection</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Write connection details</Modal.Body>
-        <Form style={{ padding: "2rem" }}>
+        <Modal.Body className={isDark ? "dark-theme" : "light-theme"}>
+          Write connection details
+        </Modal.Body>
+        <Form
+          style={{ padding: "2rem" }}
+          className={isDark ? "dark-theme" : "light-theme"}
+        >
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Connection IP:</Form.Label>
             <Form.Control type="text" />
@@ -126,22 +147,30 @@ function App() {
         <Row>
           <Col md="3">
             <ListGroup>
-              <ListGroup.Item>
+              <ListGroup.Item className={isDark ? "dark-theme" : "light-theme"}>
                 <b>Endpoint:</b> {ENDPOINT}
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item className={isDark ? "dark-theme" : "light-theme"}>
                 <b>Socket ID:</b> {socket.id}
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item className={isDark ? "dark-theme" : "light-theme"}>
                 <b>Host:</b> {window.location.host}
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item className={isDark ? "dark-theme" : "light-theme"}>
                 <b>Connected:</b> {connectionIP}
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item className={isDark ? "dark-theme" : "light-theme"}>
                 <b>PORT:</b> {connectionPORT}
               </ListGroup.Item>
             </ListGroup>
+            <Form.Check
+              type="switch"
+              id="custom-switch"
+              label="Dark Mode"
+              value={isDark}
+              onChange={handleThemeChange}
+              style={{ margin: "1rem" }}
+            />
             {isAlice ? (
               <Button
                 className="primary"
