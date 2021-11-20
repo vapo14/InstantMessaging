@@ -7,6 +7,7 @@ import {
   Row,
   Col,
   ListGroup,
+  Navbar,
 } from "react-bootstrap";
 import { useState, useEffect, useRef } from "react";
 import socketIOClient from "socket.io-client";
@@ -105,10 +106,7 @@ function App() {
   };
 
   return (
-    <div
-      style={{ padding: "2rem" }}
-      className={isDark ? "dark-theme" : "light-theme"}
-    >
+    <div className={isDark ? "dark-theme" : "light-theme"}>
       <Modal show={showConnectionModal} onHide={handleClose}>
         <Modal.Header
           closeButton
@@ -143,10 +141,26 @@ function App() {
           </Button>
         </Form>
       </Modal>
-      <Container>
+      <Navbar
+        bg={isDark ? "dark" : "light"}
+        variant={isDark ? "dark" : "light"}
+      >
+        <Container>
+          <Navbar.Brand href="#">Encrypted Messaging App</Navbar.Brand>
+          <Form.Check
+            type="switch"
+            id="custom-switch"
+            label="Dark Mode"
+            value={isDark}
+            onChange={handleThemeChange}
+            style={{ margin: "1rem" }}
+          />
+        </Container>
+      </Navbar>
+      <Container style={{ marginTop: "2rem" }}>
         <Row>
           <Col md="3">
-            <ListGroup>
+            <ListGroup className="chat-info">
               <ListGroup.Item className={isDark ? "dark-theme" : "light-theme"}>
                 <b>Endpoint:</b> {ENDPOINT}
               </ListGroup.Item>
@@ -163,14 +177,7 @@ function App() {
                 <b>PORT:</b> {connectionPORT}
               </ListGroup.Item>
             </ListGroup>
-            <Form.Check
-              type="switch"
-              id="custom-switch"
-              label="Dark Mode"
-              value={isDark}
-              onChange={handleThemeChange}
-              style={{ margin: "1rem" }}
-            />
+
             {isAlice ? (
               <Button
                 className="primary"
@@ -185,18 +192,7 @@ function App() {
             )}
           </Col>
           <Col>
-            <div
-              style={{
-                height: "80vh",
-                overflowY: "scroll",
-                border: "solid #c4c5c7 1px",
-                borderRadius: ".5rem",
-                maxWidth: "60vw",
-                marginLeft: "auto",
-                marginRight: "auto",
-                padding: " 4rem",
-              }}
-            >
+            <div className="chat-container">
               <Container>
                 {messages.map((m) => {
                   return (

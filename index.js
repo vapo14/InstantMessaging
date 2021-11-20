@@ -127,6 +127,7 @@ io.on("connection", (socket) => {
           console.log("bob is creating keys");
           publicKey = computeDiffieHellman(a, randomX, q);
           dfKey = computeDiffieHellman(bigInt(payload.data.y), randomX, q);
+          console.log(publicKey, dfKey);
           socketOut.emit("Mensaje ASCP", {
             function: 3,
             data: { q: q.value, a: a.value, y: publicKey.value },
