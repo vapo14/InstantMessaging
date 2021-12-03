@@ -25,7 +25,7 @@ function App() {
   const [isAlice, setIsAlice] = useState(false);
   const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   const [isDark, setisDark] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [showToast, setShowToast] = useState(true);
   const [MAC, setMAC] = useState(false);
 
   let key = 0;
@@ -225,15 +225,16 @@ function App() {
               style={{
                 position: "absolute",
                 bottom: "2rem",
-                right: "2rem",
+                left: "2rem",
                 zIndex: "10",
               }}
+              bg={isDark ? "dark" : "light"}
             >
               <Toast.Header>
                 <strong className="me-auto">Invalid Integrity</strong>
                 <small>just now</small>
               </Toast.Header>
-              <Toast.Body>
+              <Toast.Body className={isDark ? "dark text-white" : "Light"}>
                 You did not get this message because it has been modified!
               </Toast.Body>
             </Toast>
