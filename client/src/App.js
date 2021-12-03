@@ -25,7 +25,7 @@ function App() {
   const [isAlice, setIsAlice] = useState(false);
   const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   const [isDark, setisDark] = useState(false);
-  const [showToast, setShowToast] = useState(true);
+  const [showToast, setShowToast] = useState(false);
   const [MAC, setMAC] = useState(false);
 
   let key = 0;
