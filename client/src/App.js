@@ -13,6 +13,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import socketIOClient from "socket.io-client";
 import "./custom.css";
+import crypto from "crypto";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
@@ -26,6 +27,7 @@ function App() {
   const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   const [isDark, setisDark] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [MAC, setMAC] = useState("");
 
   let key = 0;
   const mounted = useRef();
@@ -51,6 +53,14 @@ function App() {
     } else {
       setshowConnectionModal(false);
     }
+  };
+
+  const handleInjectMAC = (e) => {
+    e.preventDefault();
+    // generate new MAC
+    setMAC(crypto.createHash("sha1").update("some random text").digest("utf8"));
+    console.warn("sending custom MAC: ", MAC);
+    socket.emit("Custom MAC", MAC);
   };
 
   const handleThemeChange = () => {
@@ -80,7 +90,9 @@ function App() {
       console.log(messages);
     });
 
-    socket.on("InvalidIntegrity", () => {});
+    socket.on("InvalidIntegrity", () => {
+      setShowToast(!showToast);
+    });
     scrollToBottom();
     // eslint-disable-next-line
   }, []);
@@ -187,6 +199,18 @@ function App() {
               </ListGroup.Item>
             </ListGroup>
 
+            <Form>
+              <Form.Label>Custom MAC</Form.Label>
+              <Form.Control type="text" disabled value={MAC} />
+              <Button
+                className="primary"
+                style={{ margin: "1rem" }}
+                onClick={handleInjectMAC}
+              >
+                Inject MAC
+              </Button>
+            </Form>
+
             {isAlice ? (
               <Button
                 className="primary"
@@ -200,7 +224,16 @@ function App() {
               <div></div>
             )}
 
-            <Toast show={showToast} onClose={toggleToast}>
+            <Toast
+              show={showToast}
+              onClose={toggleToast}
+              style={{
+                position: "absolute",
+                bottom: "2rem",
+                right: "2rem",
+                zIndex: "10",
+              }}
+            >
               <Toast.Header>
                 <strong className="me-auto">Invalid Integrity</strong>
                 <small>just now</small>

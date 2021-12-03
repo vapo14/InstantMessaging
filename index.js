@@ -42,6 +42,8 @@ var randomX = bigInt(Math.floor(Math.random() * q)).value;
 var dfKey;
 var publicKey;
 
+var customMAC;
+
 //diffie hellman compute
 function computeDiffieHellman(a, exp, qr) {
   var res = a.modPow(exp, qr);
@@ -116,19 +118,18 @@ io.on("connection", (socket) => {
   socket.on("Mensaje ASCP", (payload) => {
     switch (payload.function) {
       case 1:
-        console.log("Encriptado: ", socket.id + " " + payload.data);
+        console.log("Encriptado: ", payload);
         mensajes.push(payload.data);
         // desencriptar payload.data
         payload.data = decodeDesECB(payload.data, dfKey.value.toString());
-        console.log("desencriptado: ", payload.data);
+        console.log("desencriptado: ", payload);
 
         //calcular mac y comparar
         let MAC = crypto.createHmac("sha1", dfKey.value.toString());
         MAC.update(payload.data);
 
         let decryptedMAC = decodeDesECB(payload.MAC, dfKey.value.toString());
-
-        if (decryptedMAC === MAC) {
+        if (decryptedMAC === MAC.digest("utf8")) {
           console.log("integrity confirmed");
           io.emit("ToClient", payload);
         } else {
@@ -183,12 +184,30 @@ io.on("connection", (socket) => {
     // calcular MAC antes de encriptar
     let MAC = crypto.createHmac("sha1", dfKey.value.toString());
     MAC.update(payload.data);
-    let encodedMAC = encodeDesECB(MAC.toString(), dfKey.value.toString());
+    let encodedMAC = encodeDesECB(MAC.digest("utf8"), dfKey.value.toString());
 
     let encodedMessage = encodeDesECB(payload.data, dfKey.value.toString());
     payload.data = encodedMessage;
-    payload.MAC = encodedMAC;
+    if (customMAC !== undefined && customMAC !== "") {
+      payload = {
+        ...payload,
+        MAC: customMAC,
+      };
+    } else {
+      payload = {
+        ...payload,
+        MAC: encodedMAC,
+      };
+    }
+
+    console.log("sending mac: ", payload);
     socketOut.emit("Mensaje ASCP", payload);
+  });
+});
+
+io.on("connection", (socket) => {
+  socket.on("Custom MAC", (MAC) => {
+    customMAC = MAC;
   });
 });
 
