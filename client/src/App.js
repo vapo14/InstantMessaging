@@ -13,7 +13,6 @@ import {
 import { useState, useEffect, useRef } from "react";
 import socketIOClient from "socket.io-client";
 import "./custom.css";
-import crypto from "crypto";
 let ENDPOINT = "http://localhost:2021";
 let socket = socketIOClient(ENDPOINT);
 let connectionIP, connectionPORT;
@@ -59,7 +58,6 @@ function App() {
     // generate new MAC
     setMAC(!MAC);
     console.warn("sending custom MAC");
-    socket.emit("Custom MAC", MAC);
   };
 
   const handleThemeChange = () => {
@@ -103,6 +101,7 @@ function App() {
     } else {
       // do componentDidUpdate logic
       scrollToBottom();
+      socket.emit("Custom MAC", MAC);
     }
   });
 

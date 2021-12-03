@@ -180,15 +180,16 @@ io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
-    let MAC;
+    let MAC = crypto.createHmac("sha1", dfKey.value.toString());
     if (customMAC) {
       // calcular MAC falsa antes de encriptar
-      MAC = crypto.createHmac("sha1", "00001111");
+      console.log("usando MAC rara");
+      MAC.update(payload.data + "una wea");
     } else {
       // calcular MAC antes de encriptar
-      MAC = crypto.createHmac("sha1", dfKey.value.toString());
+      MAC.update(payload.data);
     }
-    MAC.update(payload.data);
+
     let encodedMAC = encodeDesECB(MAC.digest("utf8"), dfKey.value.toString());
 
     let encodedMessage = encodeDesECB(payload.data, dfKey.value.toString());
