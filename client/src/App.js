@@ -8,6 +8,7 @@ import {
   Col,
   ListGroup,
   Navbar,
+  Toast,
 } from "react-bootstrap";
 import { useState, useEffect, useRef } from "react";
 import socketIOClient from "socket.io-client";
@@ -24,8 +25,14 @@ function App() {
   const [isAlice, setIsAlice] = useState(false);
   const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   const [isDark, setisDark] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
   let key = 0;
   const mounted = useRef();
+
+  const toggleToast = () => {
+    setShowToast(!showToast);
+  };
 
   const handleConnectionChange = () => {
     setIsAlice(!isAlice);
@@ -72,6 +79,8 @@ function App() {
       setMessages((oldArray) => [...oldArray, { id: 1, data: payload.data }]);
       console.log(messages);
     });
+
+    socket.on("InvalidIntegrity", () => {});
     scrollToBottom();
     // eslint-disable-next-line
   }, []);
@@ -190,6 +199,16 @@ function App() {
             ) : (
               <div></div>
             )}
+
+            <Toast show={showToast} onClose={toggleToast}>
+              <Toast.Header>
+                <strong className="me-auto">Invalid Integrity</strong>
+                <small>just now</small>
+              </Toast.Header>
+              <Toast.Body>
+                You did not get this message because it has been modified!
+              </Toast.Body>
+            </Toast>
           </Col>
           <Col>
             <div className="chat-container">

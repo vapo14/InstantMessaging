@@ -27,7 +27,8 @@ const io = require("socket.io")(http, {
       q: Number,
       a: Number,
       y: Number
-    }
+    },
+    MAC: string
   }
 
 */
@@ -120,7 +121,22 @@ io.on("connection", (socket) => {
         // desencriptar payload.data
         payload.data = decodeDesECB(payload.data, dfKey.value.toString());
         console.log("desencriptado: ", payload.data);
-        io.emit("ToClient", payload);
+
+        //calcular mac y comparar
+        let MAC = crypto.createHmac("sha1", dfKey.value.toString());
+        MAC.update(payload.data);
+
+        let decryptedMAC = decodeDesECB(payload.MAC, dfKey.value.toString());
+
+        if (decryptedMAC === MAC) {
+          console.log("integrity confirmed");
+          io.emit("ToClient", payload);
+        } else {
+          console.log("message has been modified");
+          // send something to react
+          io.emit("InvalidIntegrity");
+        }
+
         break;
       case 2:
         if (!isAlice) {
@@ -163,8 +179,15 @@ io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
+
+    // calcular MAC antes de encriptar
+    let MAC = crypto.createHmac("sha1", dfKey.value.toString());
+    MAC.update(payload.data);
+    let encodedMAC = encodeDesECB(MAC.toString(), dfKey.value.toString());
+
     let encodedMessage = encodeDesECB(payload.data, dfKey.value.toString());
     payload.data = encodedMessage;
+    payload.MAC = encodedMAC;
     socketOut.emit("Mensaje ASCP", payload);
   });
 });
