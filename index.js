@@ -180,26 +180,20 @@ io.on("connection", (socket) => {
   socket.on("FromClient", (payload) => {
     // encriptar payload.data
     console.log(payload);
-
-    // calcular MAC antes de encriptar
-    let MAC = crypto.createHmac("sha1", dfKey.value.toString());
+    let MAC;
+    if (customMAC) {
+      // calcular MAC falsa antes de encriptar
+      MAC = crypto.createHmac("sha1", "00001111");
+    } else {
+      // calcular MAC antes de encriptar
+      MAC = crypto.createHmac("sha1", dfKey.value.toString());
+    }
     MAC.update(payload.data);
     let encodedMAC = encodeDesECB(MAC.digest("utf8"), dfKey.value.toString());
 
     let encodedMessage = encodeDesECB(payload.data, dfKey.value.toString());
     payload.data = encodedMessage;
-    if (customMAC !== undefined && customMAC !== "") {
-      payload = {
-        ...payload,
-        MAC: customMAC,
-      };
-    } else {
-      payload = {
-        ...payload,
-        MAC: encodedMAC,
-      };
-    }
-
+    payload = { ...payload, MAC: encodedMAC };
     console.log("sending mac: ", payload);
     socketOut.emit("Mensaje ASCP", payload);
   });

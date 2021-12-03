@@ -27,7 +27,7 @@ function App() {
   const [keysButtonStatus, setKeysButtonStatus] = useState(false);
   const [isDark, setisDark] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [MAC, setMAC] = useState("");
+  const [MAC, setMAC] = useState(false);
 
   let key = 0;
   const mounted = useRef();
@@ -55,11 +55,10 @@ function App() {
     }
   };
 
-  const handleInjectMAC = (e) => {
-    e.preventDefault();
+  const handleInjectMAC = () => {
     // generate new MAC
-    setMAC(crypto.createHash("sha1").update("some random text").digest("utf8"));
-    console.warn("sending custom MAC: ", MAC);
+    setMAC(!MAC);
+    console.warn("sending custom MAC");
     socket.emit("Custom MAC", MAC);
   };
 
@@ -199,16 +198,13 @@ function App() {
               </ListGroup.Item>
             </ListGroup>
 
-            <Form>
-              <Form.Label>Custom MAC</Form.Label>
-              <Form.Control type="text" disabled value={MAC} />
-              <Button
-                className="primary"
-                style={{ margin: "1rem" }}
-                onClick={handleInjectMAC}
-              >
-                Inject MAC
-              </Button>
+            <Form style={{ margin: "1rem" }}>
+              <Form.Label>Inject Custom MAC</Form.Label>
+              <Form.Check
+                type="switch"
+                value={MAC}
+                onChange={handleInjectMAC}
+              />
             </Form>
 
             {isAlice ? (
