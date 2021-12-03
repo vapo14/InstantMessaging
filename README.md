@@ -10,4 +10,6 @@
  - The client is located in the `client` directory.
  - `cd` into the client directory and run `npm install` to install dependencies: socket.io-client and react-bootstrap.
  - Run `npm start` to start the react client on port 3000.
- - Specify the **ip** and **port** of the recepient. 
+ - Specify the **ip** and **port** of the recepient.
+ - Specify if the user starts or not the connection.
+ - If the user starts the connection it should click "Exchange Keys" to start it.
