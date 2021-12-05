@@ -129,7 +129,7 @@ io.on("connection", (socket) => {
         MAC.update(payload.data);
 
         let decryptedMAC = decodeDesECB(payload.MAC, dfKey.value.toString());
-        if (decryptedMAC === MAC.digest("utf8")) {
+        if (decryptedMAC === MAC.digest("base64")) {
           console.log("integrity confirmed");
           io.emit("ToClient", payload);
         } else {
@@ -189,8 +189,9 @@ io.on("connection", (socket) => {
       // calcular MAC antes de encriptar
       MAC.update(payload.data);
     }
-
-    let encodedMAC = encodeDesECB(MAC.digest("utf8"), dfKey.value.toString());
+    let digestedMAC = MAC.digest("base64");
+    console.log(digestedMAC);
+    let encodedMAC = encodeDesECB(digestedMAC, dfKey.value.toString());
 
     let encodedMessage = encodeDesECB(payload.data, dfKey.value.toString());
     payload.data = encodedMessage;
